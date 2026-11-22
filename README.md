@@ -4,6 +4,8 @@
 
 # GLaDOS 自动签到
 
+![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&size=22&pause=1000&color=0366D6&center=true&vCenter=true&width=600&lines=%E6%AC%A2%E8%BF%8E%E6%9D%A5%E5%88%B0+GLaDOS+%E8%87%AA%E5%8A%A8%E7%AD%BE%E5%88%B0%3B%E6%AF%8F%E5%A4%A9%E8%87%AA%E5%8A%A8%E5%AE%8C%E6%88%90%E7%AD%BE%E5%88%B0%3B%E7%BB%93%E6%9E%9C%E6%8E%A8%E9%80%81%E5%88%B0%E6%89%8B%E6%9C%BA)
+
 <p><sub>每天自动完成签到，结果可推送到手机。</sub></p>
 
 支持 **多账号** · **8 个域名** · **Cloudflare Turnstile**：可用 GitHub Actions 无人值守，也可用浏览器扩展在本机真实浏览器中签到。
@@ -12,6 +14,7 @@
 [![Python](https://img.shields.io/badge/python-3.13-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![GLaDOS Check-in](https://github.com/Devilstore/Glados-Railgun-checkin/actions/workflows/gladosCheck.yml/badge.svg?branch=master)](https://github.com/Devilstore/Glados-Railgun-checkin/actions/workflows/gladosCheck.yml)
 [![Last commit](https://img.shields.io/github/last-commit/Devilstore/Glados-Railgun-checkin?branch=master)](https://github.com/Devilstore/Glados-Railgun-checkin/commits/master)
+![访问量](https://komarev.com/ghpvc/?username=lzr52o&color=0e75b6&style=flat)
 
 [快速开始](#快速开始) · [浏览器扩展](#-浏览器扩展cloudflare-备用方案) · [账号配置](#配置-glados_cookies) · [积分兑换](#积分兑换) · [消息推送](#消息推送) · [问题排查](#问题排查) · [常见问题](#常见问题faq)
 
@@ -390,6 +393,19 @@ Windows PowerShell 用 `$env:GLADOS_COOKIES='[...]'`。
 - 日志自动脱敏：`koa:*` / `gld:*` / Bearer → `[REDACTED]`。
 - 加入 challenge 校验机制；获取失败时回退旧协议。
 - 识别 Cloudflare/Turnstile 拦截与 403/429/503；积分不完整时日志和推送会提示改用浏览器扩展。
+
+## 📊 数据统计
+
+<div align="center">
+
+![GitHub Stats](https://github-readme-stats.vercel.app/api?username=lzr52o&show_icons=true&theme=radical)
+![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=lzr52o&layout=compact&theme=radical)
+
+![Streak](https://github-readme-streak-stats.herokuapp.com/?user=lzr52o&theme=radical)
+
+![Activity Graph](https://github-readme-activity-graph.vercel.app/graph?username=lzr52o&theme=github-compact)
+
+</div>
 
 ## ⭐Star 趋势
 
