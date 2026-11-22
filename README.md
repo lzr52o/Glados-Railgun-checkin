@@ -1,3 +1,5 @@
+![GLaDOS 自动签到](header.png)
+
 <div align="center">
 
 # GLaDOS 自动签到
