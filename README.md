@@ -423,7 +423,7 @@ Windows PowerShell 用 `$env:GLADOS_COOKIES='[...]'`。
 
 </div>
 
-## 🐍 贪吃蛇
+## 🎮 贡献图
 
 <div align="center">
 
