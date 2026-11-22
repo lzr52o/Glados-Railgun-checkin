@@ -407,6 +407,23 @@ Windows PowerShell 用 `$env:GLADOS_COOKIES='[...]'`。
 
 </div>
 
+## 🛠️ 技术栈
+
+<div align="center">
+
+![Skill Icons](https://skillicons.dev/icons?i=js,py,git,github,cloudflare,apple,vscode&theme=dark)
+
+</div>
+
+## 😄 每日一笑
+
+<div align="center">
+
+![Jokes Card](https://readme-jokes.vercel.app/api?theme=radical)
+
+</div>
+
+
 ## ⭐Star 趋势
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Devilstore/Glados-Railgun-checkin&type=Date&legend=top-left)](https://star-history.com/#Devilstore/Glados-Railgun-checkin&type=Date)
@@ -421,3 +438,5 @@ Windows PowerShell 用 `$env:GLADOS_COOKIES='[...]'`。
 - 本项目以 [MIT](LICENSE) 发布。
 
 如果这个项目对你有帮助，欢迎点个 ⭐ Star。
+
+![Footer](https://capsule-render.vercel.app/api?type=waving&color=gradient&height=120&section=footer&text=GLaDOS+%E8%87%AA%E5%8A%A8%E7%AD%BE%E5%88%B0&fontSize=24&fontColor=ffffff)
