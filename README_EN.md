@@ -27,6 +27,66 @@ Supports **multiple accounts** · **8 domains** · **Cloudflare Turnstile**: run
 > [!NOTE]
 > Unofficial project, not affiliated with GLaDOS. For learning and discussion only.
 
+## 📖Usage Guide
+
+**In short:** this script checks in to GLaDOS for you automatically every day. The points you earn can be redeemed for membership days, so you don't have to open the website and click check-in yourself.
+
+### Two ways to use it — pick one
+
+| Method | For whom | Watch out for |
+| --- | --- | --- |
+| **GitHub Actions**: fork the repo and let it run on a schedule in the cloud | You want it fully automatic without leaving your computer on | Plain HTTP requests can't pass Cloudflare Turnstile verification |
+| **Browser extension** (v1.0.1): checks in from your real local browser | When Cloudflare blocks you, or you only get 1 point | The browser must stay open for auto check-in to run |
+
+You can keep both: let Actions run on its own, and use the extension as a backup when Cloudflare blocks it. See [Browser Extension](#browser-extension-cloudflare-fallback) for the full comparison.
+
+### What you need
+
+- A GLaDOS account (if you don't have one, register with the [invitation link](https://glados.space/landing/0A58E-NV28S-6U3QV-33VMG); use promo code `DEVILSTORE` at checkout for 10% off);
+- Your account cookie: log in to the GLaDOS website, press `F12` → `Network` → refresh the page, then copy the full `Cookie` value from any request's `Request Headers`;
+- A GitHub account (only needed for the Actions method).
+
+### Three steps to get going (Actions method)
+
+1. **Fork this repo** to your own account.
+2. In your fork, go to `Settings` → `Secrets and variables` → `Actions` → `New repository secret` and add a secret named `GLADOS_COOKIES`. Its value is a JSON array with one item per account — `cookie` alone is enough:
+
+   ```json
+   [{"cookie": "koa:sess=...; koa:sess.sig=...; gld:sess=..."}]
+   ```
+
+   Add more items for more accounts. It supports 8 domains, and the script detects which site each cookie belongs to automatically. See [Configuring GLADOS_COOKIES](#configuring-glados_cookies) for all fields.
+3. Open `Actions` → `GLaDOS Check-in` → `Run workflow` and run it once by hand. If you see 「签到成功」 or 「重复签到」, you're done.
+
+### When does it run?
+
+Once set up, it runs automatically twice a day at **09:18 and 12:18 (Beijing time)** — nothing more to do. To change the time, edit the `cron` in `.github/workflows/gladosCheck.yml`; see [Changing the Run Time](#changing-the-run-time). You can also trigger a run manually from the Actions page with `Run workflow` any time.
+
+### If a run fails
+
+Check the Actions log or the push notification first, then act on what it says:
+
+- `候选域名均返回「没有权限」` or `code=-2`: your cookie has expired. Log in to the website again, grab a fresh cookie the same way, and update `GLADOS_COOKIES`;
+- `Cloudflare` / `Just a moment` / `Turnstile`, or HTTP `403` / `429` / `503`, or only 1 point earned: Cloudflare is blocking the request. Plain HTTP from Actions can't get past it, and re-running won't help — use the [browser extension](#browser-extension-cloudflare-fallback) to check in from your real browser instead;
+- 「重复签到」 ("duplicate check-in"): not a failure — it just means you already checked in today;
+- `总 None 积分` in a push message: the total-points lookup just didn't come back this time. It doesn't affect the check-in result, so you can ignore it.
+
+See [Troubleshooting](#troubleshooting) for what each log line means.
+
+### Optional extras
+
+- **Auto point redemption**: add a `GLADOS_EXCHANGE_PLAN` secret with `plan100` / `plan200` / `plan500` and, after a successful (or duplicate) check-in, it automatically redeems 100 / 200 / 500 points for 10 / 30 / 100 days. Leave it unset and nothing is redeemed; if your balance is too low, the request fails and nothing goes negative. See [Points Redemption](#points-redemption).
+- **Push results to your phone**: set `PUSHDEER_SENDKEY` (PushDeer) or `SERVERCHAN_SENDKEY` (ServerChan) — or both. See [Push Notifications](#push-notifications).
+
+### FAQ
+
+- **Multiple accounts?** Yes — add more items to `GLADOS_COOKIES`. Duplicate cookies are removed automatically.
+- **Does a failed check-in turn the workflow red?** A config error (missing cookie, invalid JSON) does. A business failure (expired cookie, server error) does not, so keep an eye on the push messages or logs.
+- **The schedule suddenly stopped running?** GitHub disables scheduled workflows on public repos after 60 days without activity. This repo has a built-in keepalive, but it's not 100% guaranteed — if it stops, just re-enable it on the Actions page.
+- **Can I run it on my own computer?** Yes, for debugging: `pip install -r requirements.txt`, set the `GLADOS_COOKIES` environment variable, then run `python checkin.py`.
+
+See [FAQ](#faq) for the full list.
+
 ## 🚀Quick Start
 
 > [!TIP]

@@ -27,6 +27,66 @@
 > [!NOTE]
 > 非官方项目，与 GLaDOS 官方无关，仅供学习与交流使用。
 
+## 📖使用说明
+
+**一句话：** 这是一个帮你每天自动完成 GLaDOS 签到的脚本，签到拿到的积分可以兑换会员天数，不用每天自己打开网站点签到。
+
+### 两种用法，选一种就行
+
+| 用法 | 适合谁 | 要注意 |
+| --- | --- | --- |
+| **GitHub Actions**：Fork 仓库后在云端定时跑 | 不想开电脑，希望全自动 | 纯网络请求，过不了 Cloudflare Turnstile 验证 |
+| **浏览器扩展**（v1.0.1）：在本机真实浏览器里签到 | 遇到 Cloudflare 拦截、只拿到 1 积分时 | 浏览器要保持打开，自动签到才跑 |
+
+两种可以同时留着：平时让 Actions 自动跑，被 Cloudflare 拦住时再用扩展补签。详细对比见[浏览器扩展](#-浏览器扩展cloudflare-备用方案)。
+
+### 需要准备什么
+
+- 一个 GLaDOS 账号（没有的话可以用[邀请链接注册](https://glados.space/landing/0A58E-NV28S-6U3QV-33VMG)，结算时填优惠码 `DEVILSTORE` 打 9 折）；
+- 账号的 Cookie：登录 GLaDOS 网站后按 `F12` → `Network` → 刷新页面，在任一请求的 `Request Headers` 里复制 `Cookie` 的完整值；
+- 一个 GitHub 账号（用 Actions 方式才需要）。
+
+### 三步用起来（Actions 方式）
+
+1. **Fork 本仓库**到你自己的账号下。
+2. 在你 Fork 的仓库里进 `Settings` → `Secrets and variables` → `Actions` → `New repository secret`，添加一个名叫 `GLADOS_COOKIES` 的 Secret，值是 JSON 数组，每个账号写一项，最少只填 `cookie` 就行：
+
+   ```json
+   [{"cookie": "koa:sess=...; koa:sess.sig=...; gld:sess=..."}]
+   ```
+
+   多账号就多写几项，支持 8 个域名，脚本会自动探测 Cookie 属于哪个站。完整字段说明见[账号配置](#配置-glados_cookies)。
+3. 打开 `Actions` → `GLaDOS Check-in` → `Run workflow` 手动跑一次，看到「签到成功」或「重复签到」就成了。
+
+### 什么时候跑
+
+配好后每天 **09:18 和 12:18（北京时间）**自动跑两次，不用管。想改时间就改 `.github/workflows/gladosCheck.yml` 里的 `cron`，详见[修改运行时间](#修改运行时间)。想手动跑，随时可以在 Actions 页面点 `Run workflow`。
+
+### 跑失败怎么办
+
+先看 Actions 日志或推送消息，按提示处理：
+
+- 提示「候选域名均返回没有权限」或 `code=-2`：Cookie 失效了，重新登录网站，按上面方法取一条新 Cookie 更新 `GLADOS_COOKIES`；
+- 出现 `Cloudflare` / `Just a moment` / `Turnstile`，或 HTTP `403` / `429` / `503`，或只拿到 1 积分：这是 Cloudflare 拦截，Actions 的纯网络请求过不去，重跑也没用，改用[浏览器扩展](#-浏览器扩展cloudflare-备用方案)在真实浏览器里补签；
+- 显示「重复签到」：不是失败，意思是今天已经签过了；
+- 推送里出现 `总 None 积分`：只是这次没取到总积分，不影响签到结果，可以忽略。
+
+更多日志含义见[问题排查](#问题排查)。
+
+### 还能顺手配什么（可选）
+
+- **积分自动兑换**：加一个 `GLADOS_EXCHANGE_PLAN` 的 Secret，填 `plan100` / `plan200` / `plan500`，签到成功后自动用 100 / 200 / 500 积分换 10 / 30 / 100 天。不填就不兑换，余额不足也不会扣成负数。详见[积分兑换](#积分兑换)。
+- **签到结果推到手机**：配 `PUSHDEER_SENDKEY`（PushDeer）或 `SERVERCHAN_SENDKEY`（Server酱），两个可以同时配。详见[消息推送](#消息推送)。
+
+### 常见问题
+
+- **支持多账号吗？** 支持，`GLADOS_COOKIES` 里多写几项就行，重复的 Cookie 会自动去重。
+- **签到失败了 Actions 会变红吗？** 配置错了（没填 Cookie、JSON 写错了）会变红；Cookie 失效、服务端报错这类业务失败不会变红，要靠推送或日志自己留意。
+- **定时任务突然不跑了？** GitHub 对公开仓库有「连续 60 天无活动就停用定时任务」的规则，本仓库虽然内置了 keepalive，但不保证 100% 有效，发现停跑去 Actions 页面重新启用即可。
+- **能在自己电脑上跑吗？** 可以，用来调试：`pip install -r requirements.txt`，设置好 `GLADOS_COOKIES` 环境变量后跑 `python checkin.py`。
+
+完整问答见[常见问题](#常见问题faq)。
+
 ## 🚀快速开始
 
 > [!TIP]

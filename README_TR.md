@@ -27,6 +27,66 @@
 > [!NOTE]
 > Resmî olmayan bir projedir, GLaDOS resmî sitesiyle ilgisi yoktur. Yalnızca öğrenme ve paylaşım amaçlıdır.
 
+## 📖Kullanım Kılavuzu
+
+**Kısaca:** Bu betik, her gün GLaDOS check-in işlemini sizin için otomatik olarak yapar. Check-in ile kazandığınız puanları üyelik günüyle değiştirebilirsiniz; her gün siteyi açıp kendiniz check-in yapmanıza gerek kalmaz.
+
+### İki kullanım yolu var, birini seçmeniz yeterli
+
+| Yöntem | Kimler için | Dikkat edilecekler |
+| --- | --- | --- |
+| **GitHub Actions**: depoyu fork edip bulutta zamanlanmış olarak çalıştırma | Bilgisayarı açık bırakmadan tam otomatik isteyenler | Düz HTTP istekleri Cloudflare Turnstile doğrulamasını geçemez |
+| **Tarayıcı uzantısı** (v1.0.1): kendi bilgisayarınızdaki gerçek tarayıcıda check-in | Cloudflare engeline takıldığınızda veya yalnızca 1 puan aldığınızda | Otomatik check-in için tarayıcının açık kalması gerekir |
+
+İkisini birlikte de bırakabilirsiniz: normalde Actions otomatik çalışsın, Cloudflare engellediğinde uzantıyla tamamlayın. Ayrıntılı karşılaştırma için bkz. [Tarayıcı Uzantısı](#tarayıcı-uzantısı-cloudflare-yedek-çözümü).
+
+### Neler gerekli?
+
+- Bir GLaDOS hesabı (yoksa [davet bağlantısıyla](https://glados.space/landing/0A58E-NV28S-6U3QV-33VMG) kaydolabilirsiniz; ödeme sırasında `DEVILSTORE` indirim kodunu kullanırsanız %10 indirim alırsınız);
+- Hesabınızın çerezi (Cookie): GLaDOS sitesine giriş yaptıktan sonra `F12` → `Network` → sayfayı yenileyin ve herhangi bir isteğin `Request Headers` bölümünden `Cookie` değerinin tamamını kopyalayın;
+- Bir GitHub hesabı (yalnızca Actions yöntemi için gerekir).
+
+### Üç adımda başlayın (Actions yöntemi)
+
+1. **Bu depoyu fork edin** ve kendi hesabınıza kopyalayın.
+2. Fork ettiğiniz depoda `Settings` → `Secrets and variables` → `Actions` → `New repository secret` yolunu izleyip `GLADOS_COOKIES` adında bir Secret ekleyin. Değer, hesap başına bir öğe içeren bir JSON dizisidir; yalnızca `cookie` yazmanız yeterlidir:
+
+   ```json
+   [{"cookie": "koa:sess=...; koa:sess.sig=...; gld:sess=..."}]
+   ```
+
+   Birden fazla hesap için öğe eklemeniz yeterlidir. 8 alan adını destekler; çerezin hangi siteye ait olduğunu betik otomatik olarak algılar. Tüm alanların açıklaması için bkz. [GLADOS_COOKIES Yapılandırması](#glados_cookies-yapılandırması).
+3. `Actions` → `GLaDOS Check-in` → `Run workflow` yolunu açıp bir kez el ile çalıştırın. 「签到成功」veya「重复签到」görürseniz tamamdır.
+
+### Ne zaman çalışır?
+
+Kurulum bittiğinde her gün **09:18 ve 12:18 (Pekin saati)** olmak üzere günde iki kez otomatik çalışır; başka bir şey yapmanıza gerek yoktur. Saati değiştirmek isterseniz `.github/workflows/gladosCheck.yml` dosyasındaki `cron` değerini düzenleyin; ayrıntılar için bkz. [Çalışma Saatini Değiştirme](#çalışma-saatini-değiştirme). İstediğiniz zaman Actions sayfasından `Run workflow` ile el ile de çalıştırabilirsiniz.
+
+### Çalışma başarısız olursa ne yapmalı?
+
+Önce Actions günlüğüne veya bildirim mesajına bakın, sonra yazana göre hareket edin:
+
+- `候选域名均返回「没有权限」` veya `code=-2` görürseniz: çerezin süresi dolmuştur. Siteye yeniden giriş yapıp yukarıdaki yöntemle yeni bir çerez alın ve `GLADOS_COOKIES` değerini güncelleyin;
+- `Cloudflare` / `Just a moment` / `Turnstile` görürseniz, HTTP `403` / `429` / `503` alırsanız veya yalnızca 1 puan alırsanız: bu bir Cloudflare engelidir. Actions'ın düz HTTP istekleri bunu aşamaz; yeniden çalıştırmak işe yaramaz, [tarayıcı uzantısıyla](#tarayıcı-uzantısı-cloudflare-yedek-çözümü) gerçek tarayıcıdan check-in yapın;
+- 「重复签到」görürseniz: bu bir hata değildir; bugün zaten check-in yaptığınız anlamına gelir;
+- Bildirimde `总 None 积分` görürseniz: bu sefer toplam puan alınamamış demektir. Check-in sonucunu etkilemez, yok sayabilirsiniz.
+
+Her günlük satırının anlamı için bkz. [Sorun Giderme](#sorun-giderme).
+
+### İsteğe bağlı ek ayarlar
+
+- **Otomatik puan dönüştürme**: `GLADOS_EXCHANGE_PLAN` adında bir Secret ekleyip `plan100` / `plan200` / `plan500` yazarsanız, başarılı (veya yinelenen) bir check-in sonrasında 100 / 200 / 500 puan otomatik olarak 10 / 30 / 100 güne dönüştürülür. Boş bırakırsanız dönüştürme yapılmaz; bakiye yetersizse istek başarısız olur, bakiye eksiye düşmez. Ayrıntılar için bkz. [Puan Dönüştürme](#puan-dönüştürme).
+- **Sonucu telefona gönderme**: `PUSHDEER_SENDKEY` (PushDeer) veya `SERVERCHAN_SENDKEY` (ServerChan) ayarlayın; ikisini birlikte de ayarlayabilirsiniz. Ayrıntılar için bkz. [Bildirim Gönderimi](#bildirim-gönderimi).
+
+### Sık sorulan sorular
+
+- **Birden fazla hesap destekleniyor mu?** Evet, `GLADOS_COOKIES` içine öğe eklemeniz yeterli. Yinelenen çerezler otomatik olarak kaldırılır.
+- **Check-in başarısız olursa Actions kırmızıya döner mi?** Yapılandırma hatası (çerez girilmemesi, JSON hatası) varsa evet. Çerez süresinin dolması veya sunucu hatası gibi iş hatalarında kırmızıya dönmez; bildirimleri veya günlükleri kendiniz takip etmelisiniz.
+- **Zamanlanmış çalışma aniden durdu.** GitHub, herkese açık depolarda 60 gün etkinlik olmazsa zamanlanmış çalışmaları devre dışı bırakır. Bu depoda yerleşik bir keepalive vardır ama %100 garanti vermez; durduğunu fark ederseniz Actions sayfasından yeniden etkinleştirin.
+- **Kendi bilgisayarımda çalıştırabilir miyim?** Evet, hata ayıklama için: `pip install -r requirements.txt` çalıştırın, `GLADOS_COOKIES` ortam değişkenini ayarlayın ve `python checkin.py` çalıştırın.
+
+Tüm soru ve yanıtlar için bkz. [Sık Sorulan Sorular](#sık-sorulan-sorular-sss).
+
 ## 🚀Hızlı Başlangıç
 
 > [!TIP]
