@@ -420,7 +420,7 @@ Windows PowerShellでは `$env:GLADOS_COOKIES='[...]'` を使います。
 
 <div align="center">
 
-<img src="https://www.dmoe.cc/random.php" width="160" height="140" alt="二次元ランダム画像" /><img src="https://daily-sentence.lzr52o.workers.dev/sentence" width="440" height="140" alt="毎日の一言" /><img src="https://www.dmoe.cc/random.php?v=2" width="160" height="140" alt="二次元ランダム画像" />
+<img src="https://daily-sentence.lzr52o.workers.dev/sentence" width="440" height="140" alt="毎日の一言" />
 
 </div>
 
